@@ -6,6 +6,8 @@ _Note:_ If you use Prodigy to annotate data for an NER task, the IOB2 format is 
 
 _Note:_ The below functions only convert one text example at a time, so a batch job will require some additional looping, etc.
 
+_Note:_ The conversion process relies heavily on the [HuggingFace Tokenizer](https://huggingface.co/docs/transformers/en/main_classes/tokenizer) class which provides utilties for mapping across token and character indices, between input text and the encoded input ids.
+
 ## Example
 
 Below is an example of an NER/IOB2 format annotation:

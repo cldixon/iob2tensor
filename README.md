@@ -1,8 +1,10 @@
 # IOB Label Conversion for Named Entity Recognition (NER) Tasks
 
-This repo contains simple functions for converting [IOB2-format](<https://en.wikipedia.org/wiki/Inside–outside–beginning_(tagging)>) NER annotation data into tensor formats for Transformer-based NER tasks. Open source examples of this format include this [news-headlines](https://raw.githubusercontent.com/explosion/prodigy-recipes/master/example-datasets/annotated_news_headlines-ORG-PERSON-LOCATION-ner.jsonl) dataset, referenced by [Prodigy](https://prodi.gy) [here](https://prodi.gy/docs#first-steps3) and the [biomed-ner dataset](https://huggingface.co/datasets/knowledgator/biomed_NER).
+This repo contains simple functions for converting [IOB2-format](<https://en.wikipedia.org/wiki/Inside–outside–beginning_(tagging)>) NER annotation data into tensor formats for Transformer-based NER tasks. Open source examples of this format include this [news-headlines](https://raw.githubusercontent.com/explosion/prodigy-recipes/master/example-datasets/annotated_news_headlines-ORG-PERSON-LOCATION-ner.jsonl) dataset (e.g., referenced by [Prodigy](https://prodi.gy/docs#first-steps3)) and the [biomed-ner dataset](https://huggingface.co/datasets/knowledgator/biomed_NER).
 
-_Note:_: If you use Prodigy to annotate data for an NER task, the IOB2 format is what will be output.
+_Note:_ If you use Prodigy to annotate data for an NER task, the IOB2 format is what will be output.
+
+_Note:_ The below functions only convert one text example at a time, so a batch job will require some additional looping, etc.
 
 ## Example
 

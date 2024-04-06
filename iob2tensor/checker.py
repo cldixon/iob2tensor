@@ -2,8 +2,8 @@ from itertools import takewhile
 
 from transformers import PreTrainedTokenizer
 
-from iob_labels.labels import IobPrefixes, IGNORE_TOKEN
-from iob_labels.annotations import Annotation, DefaultFields
+from iob2tensor.labels import IobPrefixes, IGNORE_TOKEN
+from iob2tensor.annotations import Annotation, DefaultFields
 
 def invert_label_map(label_map: dict[str, int]) -> dict[int, str]:
  return {v: k for k, v in label_map.items()}

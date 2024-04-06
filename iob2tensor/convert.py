@@ -1,20 +1,21 @@
+import torch
 from transformers import PreTrainedTokenizer
 
+from iob2tensor.labels import LabelMap, IobPrefixes, format_entity_label
+from iob2tensor.labels import DEFAULT_TAG_LABEL, IGNORE_TOKEN
+from iob2tensor.annotations import Annotation, DefaultFields
+from iob2tensor.checker import check_iob_conversion
 
-from iob_labels.labels import LabelMap, IobPrefixes, format_entity_label
-from iob_labels.labels import DEFAULT_TAG_LABEL, IGNORE_TOKEN
-from iob_labels.annotations import Annotation, DefaultFields
-from iob_labels.checker import check_iob_conversion
 
-
-def convert_to_iob_labels(
+def to_iob_tensor(
     annotation: Annotation,
     label_map: LabelMap,
     tokenizer: PreTrainedTokenizer,
     ignore_token: int = IGNORE_TOKEN,
     ends_at_next_char: bool = True,
-    conversion_check: bool = True
-) -> list[int]:
+    conversion_check: bool = True,
+    return_as_list: bool = False
+) -> torch.Tensor | list[int]:
     """Create target tensor from NER span annotations following IOB format. The process requires use of the
     original annotation spans and text, encoded representation of the text, and features from the Huggingface
     Tokenizer. As a result, a few things happen in this function and a dictionary of outputs are returned."""
@@ -49,4 +50,6 @@ def convert_to_iob_labels(
             encoded["input_ids"],
             annotation
         )
+    if return_as_list is False:
+        target_labels = torch.tensor(target_labels)
     return target_labels

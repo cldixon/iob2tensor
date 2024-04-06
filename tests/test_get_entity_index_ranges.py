@@ -1,5 +1,5 @@
-from iob_labels.labels import IGNORE_TOKEN, create_label_map
-from iob_labels.checker import get_entity_index_ranges
+from iob2tensor.labels import IGNORE_TOKEN, create_label_map
+from iob2tensor.checker import get_entity_index_ranges
 
 MY_CUSTOM_LABELS = ["ARBITRARY_LABEL"]
 

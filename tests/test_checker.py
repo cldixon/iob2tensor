@@ -2,9 +2,9 @@ import pytest
 
 from transformers import AutoTokenizer
 
-from iob_labels import create_label_map
-from iob_labels.annotations import preprocessing, DefaultFields
-from iob_labels.checker import check_iob_conversion
+from iob2tensor import create_label_map
+from iob2tensor.annotations import preprocessing, DefaultFields
+from iob2tensor.checker import check_iob_conversion
 
 ## -- set constants and configurations
 TOKENIZER_CHECKPOINT = "bert-base-uncased"

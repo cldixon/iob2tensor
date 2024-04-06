@@ -43,7 +43,7 @@ The following contains instructions for producing this conversion.
 
 ## Usage
 
-### Annotation Schema and Validation
+### Preprocessing and Schema Validation
 
 One of the first challenges in preprocessing data annotated for an NER task is managing the complexity of nested annotations, different field names, and the various ways to _label_ an annotated entity. Since Transformers are coupled to a Tokenizer, an NER schema based around attaching labels to tokens (e.g., words) introduces complexity because the labeled tokens will have to be converted for every different tokenizer. Additionally, this also allows any nuances of the tokenizer used in annotation to mix with the data.
 
@@ -66,7 +66,7 @@ annotation = {
 Due to the complex structure of NER spans and the associated text field, we perform a preprocessing and validation step to ensure everything is in good order. This happens thanks to [Pydantic](https://docs.pydantic.dev/latest/) as an intermediate step, but the outputs are still typed dictionaries to keep things simple for the user.
 
 ```python
-from iob_labels import preprocess
+from iob2tensor import preprocess
 
 text = "Did Dame Judy Dench star in a British film about Queen Elizabeth?"
 
@@ -105,12 +105,14 @@ annotation = {
         ...
 }
 
-annotation = preprocessing(
+annotation = preprocess(
     **annotation,
     spans_field="entities",
     label_field="class"
 )
 ```
+
+### Create Label Map
 
 Next, create the IOB label map with your dataset's entity labels. The default label in the IOB2 format, represents all tokens which are not entities and thus is referred to as the _outside_ class. The convention is to assign all tokens of this class as `label=0`. Additionally, the IOB2 format distinguishes between the _beginning_ of _inside_ of an entity label, so each entity class will generate 2 _distinct_ labels, following this format:
 
@@ -122,7 +124,7 @@ This means the label set and mapping will always have a size of `(_n_ * 2) + 1`,
 Use the following function to create the initial label map for your dataset's labels.
 
 ```python
-from iob_labels import create_label_map
+from iob2tensor import create_label_map
 
 labels = ["actor", "character", "plot"]
 
@@ -136,6 +138,8 @@ label_map
 }
 ```
 
+### Create Target Output
+
 Now we select and initialize a tokenizer - which has to be involved in the iob label conversion due to tokenization - and convert our NER annotation into a label array.
 
 There is a built-in conversion check (on by default) which ensures the conversion is correct. This is guaranteed to work for the supported tokenizers, but can also be turned off in order to reduce computation.
@@ -143,10 +147,12 @@ There is a built-in conversion check (on by default) which ensures the conversio
 ```python
 from transformers import AutoTokenizer
 
+from iob2tensor import to_iob_tensor
+
 checkpoint = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
-iob_labels = convert_to_iob_labels(annotation, label_map, tokenizer)
+iob_labels = to_iob_tensor(annotation, label_map, tokenizer)
 iob_labels
 >>> [-100, 0, 1, 2, 2, 2, 0, 0, 0, 5, 0, 0, 3, 4, 0, -100]
 ```
@@ -158,3 +164,7 @@ import torch
 
 x = torch.tensor(iob_labels)
 ```
+
+### Tests
+
+There is a built-in check (can be optionally turned off) within the main `to_iob_tensor()` function, which attempts to confirm the iob2 conversion is correct. Additionally, there are a series of additional unit and end-to-end tests in the `tests` directory. Finally, the `tokenizers.py` file contains the specific tokenizer checkpoints which I have tested.

@@ -1,4 +1,4 @@
-from iob_labels import create_label_map
+from iob2tensor import create_label_map
 
 TEST_LABELS = ["character", "actor", "plot"]
 

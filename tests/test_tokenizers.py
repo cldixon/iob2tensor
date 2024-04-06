@@ -1,7 +1,7 @@
 from transformers import AutoTokenizer
 
-from iob_labels import preprocessing, create_label_map, convert_to_iob_labels
-from iob_labels.tokenizers import SUPPORTED_TOKENIZERS
+from iob2tensor import preprocessing, create_label_map, to_iob_tensor
+from iob2tensor.tokenizers import SUPPORTED_TOKENIZERS
 
 labels = ["actor", "character", "plot"]
 
@@ -28,7 +28,7 @@ def test_tokenizer_compatability():
             label_map = create_label_map(labels)
 
             # -- convert annotation to iob tensor format ----
-            iob_tensor = convert_to_iob_labels(
+            iob_tensor = to_iob_tensor(
                 validated_annotation,
                 label_map,
                 tokenizer,

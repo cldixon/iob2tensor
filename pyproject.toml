@@ -1,0 +1,19 @@
+[project]
+name = "iob2tensor"
+version = "0.1.0"
+description = "Utility for converting IOB2 annotations (i.e., NER) to tensors for token classification."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.12.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ipython>=8.37.0",
+    "pytest>=8.4.2",
+]

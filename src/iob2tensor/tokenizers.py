@@ -10,5 +10,5 @@ SUPPORTED_TOKENIZERS = [
     "distilbert-base-cased",
     "distilbert-base-uncased",
     "roberta-base",
-    "roberta-large"
+    "roberta-large",
 ]

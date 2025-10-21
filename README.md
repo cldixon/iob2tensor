@@ -68,7 +68,7 @@ annotation = {
 Due to the complex structure of NER spans and the associated text field, we perform a preprocessing and validation step to ensure everything is in good order. This happens thanks to [Pydantic](https://docs.pydantic.dev/latest/) as an intermediate step, but the outputs are still typed dictionaries to keep things simple for the user.
 
 ```python
-from iob2tensor import preprocess
+from iob2tensor import preprocessing
 
 text = "Did Dame Judy Dench star in a British film about Queen Elizabeth?"
 

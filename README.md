@@ -7,7 +7,7 @@ If you use annotation tools like [Prodigy](https://prodi.gy/docs), [Label Studio
 ## Installation
 
 ```bash
-pip install iob2labels
+uv add iob2labels
 ```
 
 Dependencies: `tokenizers` (HuggingFace Rust-backed tokenizer) and `pydantic`. No `torch` or `transformers` required.
@@ -133,7 +133,7 @@ Other HuggingFace-compatible tokenizers should work as well. The built-in conver
 ## Tests
 
 ```bash
-pytest tests/ -v
+uv run pytest tests/ -v
 ```
 
 The test suite includes unit tests for label map construction, entity range detection, and the conversion checker, plus a parametrized matrix of 12 tokenizer checkpoints across multiple annotation edge cases (entities at text boundaries, adjacent entities, punctuation, etc.).

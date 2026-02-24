@@ -1,172 +1,139 @@
-# IOB Label Conversion for Named Entity Recognition (NER) Tasks
+# iob2labels
 
-This repo contains simple functions for converting [IOB2-format](<https://en.wikipedia.org/wiki/Inside–outside–beginning_(tagging)>) NER annotation data into tensor formats for Transformer-based NER tasks. Open source examples of this format include this [news-headlines](https://raw.githubusercontent.com/explosion/prodigy-recipes/master/example-datasets/annotated_news_headlines-ORG-PERSON-LOCATION-ner.jsonl) dataset (e.g., referenced by [Prodigy](https://prodi.gy/docs#first-steps3)) and the [biomed-ner dataset](https://huggingface.co/datasets/knowledgator/biomed_NER).
+Convert [IOB2-format](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)) NER span annotations into integer label sequences for Transformer-based token classification tasks.
 
-_Note:_ If you use Prodigy to annotate data for an NER task, the IOB2 format is what will be output.
+If you use annotation tools like [Prodigy](https://prodi.gy/docs), [Label Studio](https://labelstud.io/), or [Doccano](https://github.com/doccano/doccano) to annotate NER data, this library converts those character-offset span annotations into the label arrays you need for training.
 
-_Note:_ The below functions only convert one text example at a time, so a batch job will require some additional looping, etc.
+## Installation
 
-_Note:_ The conversion process relies heavily on the [HuggingFace Tokenizer](https://huggingface.co/docs/transformers/en/main_classes/tokenizer) class which provides utilties for mapping across token and character indices, between input text and the encoded input ids.
-
-## Example
-
-Below is an example of an NER/IOB2 format annotation:
-
-```python
-# example annotation and labels
-annotation = {
-    "text": "Did Dame Judy Dench star in a British film about Queen Elizabeth?",
-    "spans": [
-        {"label": "actor", "start": 4, "end": 19},
-        {"label": "plot", "start": 30, "end": 37},
-        {"label": "character", "start": 49, "end": 64}
-    ]
-}
+```bash
+pip install iob2labels
 ```
 
-> example pulled from [MITMovie](https://groups.csail.mit.edu/sls/downloads/movie/) dataset
+Dependencies: `tokenizers` (HuggingFace Rust-backed tokenizer) and `pydantic`. No `torch` or `transformers` required.
 
-In order to train a an NER model (_a la_ [Token Classification](https://huggingface.co/docs/transformers/en/tasks/token_classification) style task), we can represent the _target_ output of the above example as follows:
-
-```python
-[0, 1, 2, 2, 2, 0, 0, 0, 5, 0, 0, 3, 4, 0]
-```
-
-In which the target labels correspond to the following classes:
-
-```sh
-0 -> outside (i.e., no labels)
-1,2 -> actor (beginning and inside)
-3,4 -> character (beginning and inside)
-5 -> plot (only beginning; word only requires 1 token)
-```
-
-The following contains instructions for producing this conversion.
-
-## Usage
-
-### Preprocessing and Schema Validation
-
-One of the first challenges in preprocessing data annotated for an NER task is managing the complexity of nested annotations, different field names, and the various ways to _label_ an annotated entity. Since Transformers are coupled to a Tokenizer, an NER schema based around attaching labels to tokens (e.g., words) introduces complexity because the labeled tokens will have to be converted for every different tokenizer. Additionally, this also allows any nuances of the tokenizer used in annotation to mix with the data.
-
-For these reasons, assigning entity labels to string indices is more generic, decoupled from any specific tokenizer, and more easily checkable for errors in the data or any subsequent processing.
-
-The example below is pulled from the [MITMovie](https://groups.csail.mit.edu/sls/downloads/movie/) annotated dataset.
+## Quick Start
 
 ```python
-# example annotation and labels
-annotation = {
-    "text": "Did Dame Judy Dench star in a British film about Queen Elizabeth?",
-    "spans": [
-        {"label": "actor", "start": 4, "end": 19},
-        {"label": "plot", "start": 30, "end": 37},
-        {"label": "character", "start": 49, "end": 64}
-    ]
-}
-```
+from iob2labels import IOB2Encoder
 
-Due to the complex structure of NER spans and the associated text field, we perform a preprocessing and validation step to ensure everything is in good order. This happens thanks to [Pydantic](https://docs.pydantic.dev/latest/) as an intermediate step, but the outputs are still typed dictionaries to keep things simple for the user.
-
-```python
-from iob2tensor import preprocessing
-
-text = "Did Dame Judy Dench star in a British film about Queen Elizabeth?"
-
-spans = [
-    {"label": "actor", "start": 4, "end": 19},
-    {"label": "plot", "start": 30, "end": 37},
-    {"label": "character", "start": 49, "end": 64}
-]
-# validate input annotations
-annotation = preprocess(text, spans)
-```
-
-The default or expected fields for input annotations are as follows:
-
-```python
-from typing import TypedDict
-
-class Span(TypedDict):
-    start: int
-    end: int
-    label: str
-
-class Annotation(TypedDict):
-    text: str
-    spans: list[Span]
-```
-
-If your annotated data uses different fields, specify those fields as function arguments. For instance, the [BioMed-NER](https://huggingface.co/datasets/knowledgator/biomed_NER) dataset follows the standard NER spans schema but uses different field names.
-
-```python
-annotation = {
-    "text": "Weed seed inactivation in soil mesocosms via biosolarization..." "entities": [
-        {"start": 0, "end": 4, "class": "ORGANISM"},
-        {"start": 5, "end": 9, "class": "ORGANISM"},
-        {"start": 26, "end": 30, "class": "CHEMICALS"},
-        ...
-}
-
-annotation = preprocess(
-    **annotation,
-    spans_field="entities",
-    label_field="class"
+encoder = IOB2Encoder(
+    labels=["actor", "character", "plot"],
+    tokenizer="bert-base-uncased",
 )
+
+labels = encoder(
+    text="Did Dame Judy Dench star in a British film about Queen Elizabeth?",
+    spans=[
+        {"label": "actor", "start": 4, "end": 19},
+        {"label": "plot", "start": 30, "end": 37},
+        {"label": "character", "start": 49, "end": 64},
+    ]
+)
+# >>> [-100, 0, 1, 2, 2, 2, 0, 0, 0, 5, 0, 0, 3, 4, 0, -100]
 ```
 
-### Create Label Map
+> Example pulled from the [MITMovie](https://groups.csail.mit.edu/sls/downloads/movie/) dataset.
 
-Next, create the IOB label map with your dataset's entity labels. The default label in the IOB2 format, represents all tokens which are not entities and thus is referred to as the _outside_ class. The convention is to assign all tokens of this class as `label=0`. Additionally, the IOB2 format distinguishes between the _beginning_ of _inside_ of an entity label, so each entity class will generate 2 _distinct_ labels, following this format:
-
-- **B-LABEL**
-- **I-LABEL**
-
-This means the label set and mapping will always have a size of `(_n_ * 2) + 1`, where _n_ equals the number of distinct labels (e.g., "location", "organization", "person", etc.) and the `+1` is from the _outside_ (non-entity) class.
-
-Use the following function to create the initial label map for your dataset's labels.
-
-```python
-from iob2tensor import create_label_map
-
-labels = ["actor", "character", "plot"]
-
-label_map = create_label_map(labels)
-label_map
->>> {
-    'O': 0,
-    'B-ACTOR': 1, 'I-ACTOR': 2,
-    'B-CHARACTER': 3, 'I-CHARACTER': 4,
-    'B-PLOT': 5, 'I-PLOT': 6
-}
-```
-
-### Create Target Output
-
-Now we select and initialize a tokenizer - which has to be involved in the iob label conversion due to tokenization - and convert our NER annotation into a label array.
-
-There is a built-in conversion check (on by default) which ensures the conversion is correct. This is guaranteed to work for the supported tokenizers, but can also be turned off in order to reduce computation.
-
-```python
-from transformers import AutoTokenizer
-
-from iob2tensor import to_iob_tensor
-
-checkpoint = "bert-base-uncased"
-tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-
-iob_labels = to_iob_tensor(annotation, label_map, tokenizer)
-iob_labels
->>> [-100, 0, 1, 2, 2, 2, 0, 0, 0, 5, 0, 0, 3, 4, 0, -100]
-```
-
-Now just one step away from a tensor!
+The output is a `list[int]` aligned to the tokenizer's output. Convert to a tensor or array as needed:
 
 ```python
 import torch
+x = torch.tensor(labels)
 
-x = torch.tensor(iob_labels)
+# or with numpy
+import numpy as np
+x = np.array(labels)
 ```
 
-### Tests
+## How It Works
 
-There is a built-in check (can be optionally turned off) within the main `to_iob_tensor()` function, which attempts to confirm the iob2 conversion is correct. Additionally, there are a series of additional unit and end-to-end tests in the `tests` directory. Finally, the `tokenizers.py` file contains the specific tokenizer checkpoints which I have tested.
+The IOB2 format assigns each token one of three tag types:
+
+- **O** (Outside) - not part of any entity
+- **B-LABEL** (Beginning) - first token of an entity
+- **I-LABEL** (Inside) - continuation of an entity
+
+Each entity class generates 2 labels (B + I), plus the O class, so the total label count is always `(n * 2) + 1`:
+
+```python
+encoder.label_map
+# >>> {'O': 0, 'B-ACTOR': 1, 'I-ACTOR': 2, 'B-CHARACTER': 3, 'I-CHARACTER': 4, 'B-PLOT': 5, 'I-PLOT': 6}
+```
+
+Special tokens (e.g., `[CLS]`, `[SEP]`) receive the ignore value `-100`, which PyTorch's `CrossEntropyLoss` skips by default.
+
+## Tokenizer Input
+
+The `tokenizer` argument accepts three forms:
+
+```python
+# 1. checkpoint name (downloads from HuggingFace Hub)
+encoder = IOB2Encoder(labels=labels, tokenizer="bert-base-uncased")
+
+# 2. standalone tokenizers.Tokenizer instance
+from tokenizers import Tokenizer
+tok = Tokenizer.from_pretrained("bert-base-uncased")
+encoder = IOB2Encoder(labels=labels, tokenizer=tok)
+
+# 3. transformers PreTrainedTokenizerFast (unwrapped automatically)
+from transformers import AutoTokenizer
+tok = AutoTokenizer.from_pretrained("bert-base-uncased")
+encoder = IOB2Encoder(labels=labels, tokenizer=tok)
+```
+
+## Batch Encoding
+
+```python
+annotations = [
+    {"text": "Did Dame Judy Dench star?", "spans": [{"label": "actor", "start": 4, "end": 19}]},
+    {"text": "Matt Damon was Jason Bourne.", "spans": [{"label": "actor", "start": 0, "end": 10}]},
+]
+
+results = encoder.batch(annotations)
+# >>> [[-100, 0, 1, 2, 2, 2, 0, -100], [-100, 1, 2, 0, 0, 0, 0, -100]]
+```
+
+The batch path uses the Rust-backed `encode_batch()` for parallelized tokenization. Returns `list[list[int]]` with no padding; use HuggingFace's `DataCollatorForTokenClassification` or your own padding for training.
+
+## Custom Field Names
+
+If your annotation data uses non-standard field names, configure them at construction:
+
+```python
+# BioMed-NER dataset uses "entities" and "class" instead of "spans" and "label"
+encoder = IOB2Encoder(
+    labels=["organism", "chemicals"],
+    tokenizer="bert-base-uncased",
+    spans_field="entities",
+    label_field="class",
+)
+```
+
+## Built-in Conversion Check
+
+By default, every encoding is verified by recovering the entity text from the produced labels and comparing it to the original annotation. This catches misalignment bugs early. Disable it for performance in production:
+
+```python
+encoder = IOB2Encoder(labels=labels, tokenizer=tok, conversion_check=False)
+```
+
+## Supported Tokenizers
+
+Tested across three tokenizer families:
+
+| Family | Checkpoints |
+|---|---|
+| WordPiece | `bert-base-cased`, `bert-base-uncased`, `bert-large-cased`, `bert-large-uncased`, `distilbert-base-cased`, `distilbert-base-uncased`, `google/electra-base-discriminator` |
+| BPE | `roberta-base`, `roberta-large` |
+| SentencePiece | `albert-base-v2`, `xlnet-base-cased`, `t5-small` |
+
+Other HuggingFace-compatible tokenizers should work as well. The built-in conversion check will flag any issues.
+
+## Tests
+
+```bash
+pytest tests/ -v
+```
+
+The test suite includes unit tests for label map construction, entity range detection, and the conversion checker, plus a parametrized matrix of 12 tokenizer checkpoints across multiple annotation edge cases (entities at text boundaries, adjacent entities, punctuation, etc.).

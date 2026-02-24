@@ -1,10 +1,10 @@
 import pytest
 
-from transformers import AutoTokenizer
+from tokenizers import Tokenizer
 
-from iob2tensor import create_label_map
-from iob2tensor.annotations import preprocessing, DefaultFields
-from iob2tensor.checker import check_iob_conversion
+from iob2labels import create_label_map
+from iob2labels.annotations import preprocessing, DefaultFields
+from iob2labels.checker import check_iob_conversion
 
 ## -- set constants and configurations
 TOKENIZER_CHECKPOINT = "bert-base-uncased"
@@ -33,26 +33,27 @@ TEST_CASES = [
             ]
         },
         "correct_iob_labels":  [-100, 0, 0, 0, 0, 1, 2, 0, 3, 4, 0, -100],
-        "incorrect_iob_labels": [-100, 0, 0, 0, 0, 0, 2, 0, 3, 4, 0, -100] # <- removed the leadeing '1' (i.e., beginning tag)
+        "incorrect_iob_labels": [-100, 0, 0, 0, 0, 0, 2, 0, 3, 4, 0, -100] # <- removed the leading '1' (i.e., beginning tag)
     }
 ]
 
 def test_conversion_checker():
     label_map = create_label_map(LABELS)
-    tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_CHECKPOINT)
+    tokenizer = Tokenizer.from_pretrained(TOKENIZER_CHECKPOINT)
+    tokenizer.enable_truncation(max_length=512)
 
     for _case in TEST_CASES:
         annotation = _case["annotation"]
         annotation = preprocessing(**annotation)
 
-        encoded = tokenizer(annotation[DefaultFields.TEXT], truncation=True)
+        encoded = tokenizer.encode(annotation[DefaultFields.TEXT])
 
         # happy path... correct conversion
         check_iob_conversion(
             _case["correct_iob_labels"],
             label_map,
             tokenizer,
-            encoded["input_ids"],
+            encoded.ids,
             annotation
         )
 
@@ -62,6 +63,6 @@ def test_conversion_checker():
                 _case["incorrect_iob_labels"],
                 label_map,
                 tokenizer,
-                encoded["input_ids"],
+                encoded.ids,
                 annotation
             )

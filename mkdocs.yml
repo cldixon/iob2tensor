@@ -5,26 +5,7 @@ repo_url: https://github.com/cldixon/iob2tensor
 repo_name: cldixon/iob2tensor
 
 theme:
-  name: material
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-  features:
-    - content.code.copy
-    - navigation.footer
-    - navigation.top
+  name: readthedocs
 
 plugins:
   - search
@@ -37,8 +18,6 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.tabbed:
-      alternate_style: true
   - tables
   - attr_list
 

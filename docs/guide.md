@@ -48,33 +48,29 @@ encoder.label_map
 
 The `tokenizer` argument accepts three forms:
 
-=== "Checkpoint string"
+**Checkpoint string** — downloads the tokenizer from HuggingFace Hub. A `UserWarning` is emitted for checkpoints not in the [tested list](tokenizers.md).
 
-    ```python
-    encoder = IOB2Encoder(labels=labels, tokenizer="bert-base-uncased")
-    ```
+```python
+encoder = IOB2Encoder(labels=labels, tokenizer="bert-base-uncased")
+```
 
-    Downloads the tokenizer from HuggingFace Hub. A `UserWarning` is emitted for checkpoints not in the [tested list](tokenizers.md).
+**`tokenizers.Tokenizer` instance** — used directly.
 
-=== "tokenizers.Tokenizer"
+```python
+from tokenizers import Tokenizer
 
-    ```python
-    from tokenizers import Tokenizer
+tok = Tokenizer.from_pretrained("bert-base-uncased")
+encoder = IOB2Encoder(labels=labels, tokenizer=tok)
+```
 
-    tok = Tokenizer.from_pretrained("bert-base-uncased")
-    encoder = IOB2Encoder(labels=labels, tokenizer=tok)
-    ```
+**`transformers.PreTrainedTokenizerFast`** — the underlying `tokenizers.Tokenizer` is unwrapped automatically via the `.backend_tokenizer` attribute.
 
-=== "transformers PreTrainedTokenizerFast"
+```python
+from transformers import AutoTokenizer
 
-    ```python
-    from transformers import AutoTokenizer
-
-    tok = AutoTokenizer.from_pretrained("bert-base-uncased")
-    encoder = IOB2Encoder(labels=labels, tokenizer=tok)
-    ```
-
-    The underlying `tokenizers.Tokenizer` is unwrapped automatically via the `.backend_tokenizer` attribute.
+tok = AutoTokenizer.from_pretrained("bert-base-uncased")
+encoder = IOB2Encoder(labels=labels, tokenizer=tok)
+```
 
 ### Optional Parameters
 

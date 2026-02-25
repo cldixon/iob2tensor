@@ -5,10 +5,15 @@ from tokenizers import Tokenizer, Encoding
 from iob2labels.annotations import (
     Annotation,
     DefaultFields,
+    Span,
     preprocessing,
     validate_batch,
 )
-from iob2labels.checker import check_iob_conversion
+from iob2labels.checker import (
+    check_iob_conversion,
+    get_entity_index_ranges,
+    invert_label_map,
+)
 from iob2labels.labels import (
     IGNORE_TOKEN,
     IobPrefixes,
@@ -210,3 +215,69 @@ class IOB2Encoder:
             )
 
         return target_labels
+
+    ## -- decoding (inverse of encoding: labels → spans)
+
+    def decode(self, labels: list[int], encoding: Encoding, text: str) -> list[Span]:
+        """Recover span annotations from IOB2 label indices.
+
+        Args:
+            labels: list[int] of IOB2 label indices (e.g., model predictions after argmax).
+            encoding: The tokenizers.Encoding object for the corresponding text.
+            text: The original text string (needed to resolve whitespace boundaries
+                  for tokenizers that absorb spaces into tokens, e.g., SentencePiece).
+
+        Returns:
+            list[Span] with character-level start, end, and label fields.
+        """
+        inv_map = invert_label_map(self._label_map)
+        entity_ranges = get_entity_index_ranges(self._label_map, labels)
+
+        spans: list[Span] = []
+        for start_tok, end_tok in entity_ranges:
+            ## -- recover character offsets from token positions
+            start_chars = encoding.token_to_chars(start_tok)
+            end_chars = encoding.token_to_chars(end_tok)
+
+            # <- skip entities on special tokens (should not happen with well-formed labels)
+            if start_chars is None or end_chars is None:
+                continue
+
+            char_start = start_chars[0]
+            char_end = end_chars[1]
+
+            ## -- strip leading whitespace absorbed by SentencePiece-style tokenizers
+            ## -- (e.g., "▁Queen" maps to chars (48, 54) but the entity starts at 49)
+            while char_start < char_end and text[char_start].isspace():
+                char_start += 1
+
+            ## -- strip trailing whitespace (symmetric safety)
+            while char_end > char_start and text[char_end - 1].isspace():
+                char_end -= 1
+
+            ## -- extract label name from the B-tag, strip "B-" prefix, lowercase
+            b_tag = inv_map[labels[start_tok]]  # <- e.g., "B-ACTOR"
+            label_name = b_tag[2:].lower()  # <- strip "B-" prefix, lowercase to match user convention
+
+            spans.append(Span(
+                start=char_start,
+                end=char_end,
+                label=label_name,
+            ))
+
+        return spans
+
+    def decode_text(self, labels: list[int], text: str) -> list[Span]:
+        """Convenience: tokenize text internally, then decode.
+
+        Use when you have the raw text but not the Encoding object.
+
+        Args:
+            labels: list[int] of IOB2 label indices.
+            text: The raw input text (will be tokenized internally).
+
+        Returns:
+            list[Span] with character-level start, end, and label fields.
+        """
+        encoding: Encoding = self._tokenizer.encode(text)
+        return self.decode(labels, encoding, text)

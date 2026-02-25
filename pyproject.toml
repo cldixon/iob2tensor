@@ -32,9 +32,17 @@ packages = ["src/iob2labels"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[project.urls]
+Documentation = "https://cldixon.github.io/iob2tensor/"
+Repository = "https://github.com/cldixon/iob2tensor"
+Issues = "https://github.com/cldixon/iob2tensor/issues"
+
 [dependency-groups]
 dev = [
     "ipython>=8.37.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-include-markdown-plugin>=7.0",
+    "mkdocs-material>=9.6",
     "pytest>=8.4.2",
     "transformers>=4.40",
 ]

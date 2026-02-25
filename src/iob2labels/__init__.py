@@ -1,3 +1,8 @@
+## -- version (read from pyproject.toml at install time)
+from importlib.metadata import version as _version
+
+__version__: str = _version("iob2labels")
+
 ## -- primary interface
 from .encoder import IOB2Encoder as IOB2Encoder
 

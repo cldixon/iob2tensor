@@ -5,21 +5,35 @@ from tokenizers import Tokenizer
 WORDPIECE_CHECKPOINTS = [
     "bert-base-uncased",
     "bert-base-cased",
+    "bert-base-multilingual-cased",
     "distilbert-base-uncased",
     "google/electra-base-discriminator",
 ]
 
 BPE_CHECKPOINTS = [
     "roberta-base",
+    "distilroberta-base",
+    "allenai/longformer-base-4096",
 ]
 
-SENTENCEPIECE_CHECKPOINTS = [
+SENTENCEPIECE_BPE_CHECKPOINTS = [
+    "FacebookAI/xlm-roberta-base",
+    "almanach/camembert-base",
+]
+
+SENTENCEPIECE_UNIGRAM_CHECKPOINTS = [
     "albert-base-v2",
     "xlnet-base-cased",
     "t5-small",
+    "google/flan-t5-base",
 ]
 
-ALL_CHECKPOINTS = WORDPIECE_CHECKPOINTS + BPE_CHECKPOINTS + SENTENCEPIECE_CHECKPOINTS
+ALL_CHECKPOINTS = (
+    WORDPIECE_CHECKPOINTS
+    + BPE_CHECKPOINTS
+    + SENTENCEPIECE_BPE_CHECKPOINTS
+    + SENTENCEPIECE_UNIGRAM_CHECKPOINTS
+)
 
 ## -- shared labels used across tests
 LABELS = ["actor", "character", "plot"]

@@ -54,6 +54,50 @@ class Annotation(TypedDict):
     text: str
     spans: list[Span]
 
+def validate_spans(text: str, spans: list[Span]) -> None:
+    """Check for common annotation mistakes and raise ValueError with a clear message.
+
+    Validates:
+      - start >= end (inverted or zero-width spans)
+      - negative offsets
+      - spans extending past text length
+      - overlapping spans
+    """
+    text_len = len(text)
+
+    for i, span in enumerate(spans):
+        start, end, label = span["start"], span["end"], span["label"]
+
+        if start < 0 or end < 0:
+            raise ValueError(
+                f"Span {i} ('{label}') has a negative offset: start={start}, end={end}. "
+                f"Character offsets must be >= 0."
+            )
+
+        if start >= end:
+            raise ValueError(
+                f"Span {i} ('{label}') has start ({start}) >= end ({end}). "
+                f"'start' must be strictly less than 'end'."
+            )
+
+        if end > text_len:
+            raise ValueError(
+                f"Span {i} ('{label}') extends past the text (end={end}, text length={text_len}). "
+                f"Ensure character offsets are within the text bounds."
+            )
+
+    ## -- check for overlapping spans (sort by start, then check pairwise)
+    if len(spans) > 1:
+        sorted_spans = sorted(enumerate(spans), key=lambda x: (x[1]["start"], x[1]["end"]))
+        for (i, prev), (j, curr) in zip(sorted_spans, sorted_spans[1:]):
+            if curr["start"] < prev["end"]:
+                raise ValueError(
+                    f"Spans {i} ('{prev['label']}', {prev['start']}:{prev['end']}) and "
+                    f"{j} ('{curr['label']}', {curr['start']}:{curr['end']}) overlap. "
+                    f"IOB2 encoding does not support overlapping entities."
+                )
+
+
 def preprocessing(
     text: str,
     spans: list[dict],
@@ -64,7 +108,10 @@ def preprocessing(
     # first convert to pydantic models to convert and validate input data
     validated = convert_to_validated_format(text, spans, start_field, end_field, label_field)
     # return as typed dict
-    return Annotation(**validated.model_dump())
+    annotation = Annotation(**validated.model_dump())
+    # <- validate spans for common mistakes after pydantic normalization
+    validate_spans(annotation["text"], annotation["spans"])
+    return annotation
 
 def validate_batch(
     annotations: list[dict],

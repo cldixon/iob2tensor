@@ -1,0 +1,28 @@
+site_name: iob2labels
+site_description: Convert IOB2-format NER span annotations into integer label sequences for Transformer-based token classification.
+site_url: https://cldixon.github.io/iob2tensor/
+repo_url: https://github.com/cldixon/iob2tensor
+repo_name: cldixon/iob2tensor
+
+theme:
+  name: readthedocs
+
+plugins:
+  - search
+  - include-markdown
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - attr_list
+
+nav:
+  - Home: index.md
+  - User Guide: guide.md
+  - API Reference: api.md
+  - Supported Tokenizers: tokenizers.md

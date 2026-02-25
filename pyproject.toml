@@ -1,7 +1,7 @@
 [project]
 name = "iob2labels"
-version = "0.2.0"
-description = "Convert IOB2 NER span annotations into integer label sequences aligned to any HuggingFace-compatible tokenizer."
+version = "0.3.0"
+description = "Encode and decode IOB2 NER span annotations to and from integer label sequences aligned to any HuggingFace-compatible tokenizer."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"

@@ -1,8 +1,8 @@
 # iob2labels
 
-Convert [IOB2-format](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)) NER span annotations into integer label sequences for Transformer-based token classification tasks.
+Convert [IOB2-format](https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)) NER span annotations into integer label sequences for Transformer-based token classification tasks — and convert them back.
 
-If you use annotation tools like [Prodigy](https://prodi.gy/docs), [Label Studio](https://labelstud.io/), or [Doccano](https://github.com/doccano/doccano) to annotate NER data, this library converts those character-offset span annotations into the label arrays you need for training.
+If you use annotation tools like [Prodigy](https://prodi.gy/docs), [Label Studio](https://labelstud.io/), or [Doccano](https://github.com/doccano/doccano) to annotate NER data, this library converts those character-offset span annotations into the label arrays you need for training. At inference time, it converts model predictions back into span annotations.
 
 ## Installation
 
@@ -22,6 +22,7 @@ encoder = IOB2Encoder(
     tokenizer="bert-base-uncased",
 )
 
+## -- encoding: spans → labels (for training)
 labels = encoder(
     text="Did Dame Judy Dench star in a British film about Queen Elizabeth?",
     spans=[
@@ -31,6 +32,10 @@ labels = encoder(
     ]
 )
 # >>> [-100, 0, 1, 2, 2, 2, 0, 0, 0, 5, 0, 0, 3, 4, 0, -100]
+
+## -- decoding: labels → spans (for inference)
+spans = encoder.decode_text(labels, "Did Dame Judy Dench star in a British film about Queen Elizabeth?")
+# >>> [{"start": 4, "end": 19, "label": "actor"}, {"start": 30, "end": 37, "label": "plot"}, {"start": 49, "end": 64, "label": "character"}]
 ```
 
 > Example pulled from the [MITMovie](https://groups.csail.mit.edu/sls/downloads/movie/) dataset.
@@ -63,6 +68,23 @@ encoder.label_map
 
 Special tokens (e.g., `[CLS]`, `[SEP]`) receive the ignore value `-100`, which PyTorch's `CrossEntropyLoss` skips by default.
 
+## Decoding
+
+At inference time, convert model predictions back into character-offset span annotations:
+
+```python
+## -- decode_text: pass the raw text (tokenizes internally)
+spans = encoder.decode_text(predicted_labels, text)
+
+## -- decode: pass a pre-built Encoding object (avoids re-tokenizing)
+encoding = encoder.tokenizer.encode(text)
+spans = encoder.decode(predicted_labels, encoding, text)
+```
+
+Both return `list[Span]` — a list of typed dicts with `start`, `end`, and `label` fields.
+
+The decoder handles SentencePiece-style tokenizers (ALBERT, XLNet, T5, XLM-RoBERTa, CamemBERT) that absorb leading whitespace into tokens (e.g., `▁Queen` maps to chars `(48, 54)` instead of `(49, 54)`). Character offsets are corrected automatically using the original text.
+
 ## Tokenizer Input
 
 The `tokenizer` argument accepts three forms:
@@ -81,6 +103,8 @@ from transformers import AutoTokenizer
 tok = AutoTokenizer.from_pretrained("bert-base-uncased")
 encoder = IOB2Encoder(labels=labels, tokenizer=tok)
 ```
+
+When using a checkpoint string not in the [tested list](#supported-tokenizers), a `UserWarning` is emitted. The tokenizer will still load and may work correctly, but round-trip correctness has not been verified.
 
 ## Batch Encoding
 
@@ -110,6 +134,21 @@ encoder = IOB2Encoder(
 )
 ```
 
+## Annotation Validation
+
+Input annotations are validated upfront with clear error messages for common mistakes:
+
+- Negative character offsets
+- Inverted spans (`start >= end`)
+- Spans extending past the text length
+- Overlapping spans (IOB2 does not support overlapping entities)
+
+```python
+encoder(text="Hello", spans=[{"label": "test", "start": 0, "end": 100}])
+# ValueError: Span 0 ('test') extends past the text (end=100, text length=5).
+# Ensure character offsets are within the text bounds.
+```
+
 ## Built-in Conversion Check
 
 By default, every encoding is verified by recovering the entity text from the produced labels and comparing it to the original annotation. This catches misalignment bugs early. Disable it for performance in production:
@@ -120,15 +159,16 @@ encoder = IOB2Encoder(labels=labels, tokenizer=tok, conversion_check=False)
 
 ## Supported Tokenizers
 
-Tested across three tokenizer families:
+Tested across four tokenizer families:
 
 | Family | Checkpoints |
 |---|---|
-| WordPiece | `bert-base-cased`, `bert-base-uncased`, `bert-large-cased`, `bert-large-uncased`, `distilbert-base-cased`, `distilbert-base-uncased`, `google/electra-base-discriminator` |
-| BPE | `roberta-base`, `roberta-large` |
-| SentencePiece | `albert-base-v2`, `xlnet-base-cased`, `t5-small` |
+| WordPiece | `bert-base-cased`, `bert-base-uncased`, `bert-large-cased`, `bert-large-uncased`, `bert-base-multilingual-cased`, `distilbert-base-cased`, `distilbert-base-uncased`, `google/electra-base-discriminator` |
+| BPE (byte-level) | `roberta-base`, `roberta-large`, `distilroberta-base`, `allenai/longformer-base-4096` |
+| SentencePiece BPE | `FacebookAI/xlm-roberta-base`, `almanach/camembert-base` |
+| SentencePiece Unigram | `albert-base-v2`, `xlnet-base-cased`, `t5-small`, `google/flan-t5-base` |
 
-Other HuggingFace-compatible tokenizers should work as well. The built-in conversion check will flag any issues.
+Other HuggingFace-compatible tokenizers with a `tokenizer.json` file on the Hub should work as well. A `UserWarning` is emitted for untested checkpoints, and the built-in conversion check will flag any alignment issues.
 
 ## Tests
 
@@ -136,4 +176,10 @@ Other HuggingFace-compatible tokenizers should work as well. The built-in conver
 uv run pytest tests/ -v
 ```
 
-The test suite includes unit tests for label map construction, entity range detection, and the conversion checker, plus a parametrized matrix of 12 tokenizer checkpoints across multiple annotation edge cases (entities at text boundaries, adjacent entities, punctuation, etc.).
+313 tests across 10 test files, including:
+
+- **Encoding matrix**: every supported tokenizer × standard, multi-entity, and edge case annotations (entity at start/end of text, adjacent entities, punctuation)
+- **Decoding round-trips**: encode → decode → assert recovered spans exactly match originals, across all 18 tokenizers. This is the strongest correctness guarantee — if the round-trip holds, both the encoder and decoder are correct for that tokenizer.
+- **Annotation validation**: negative offsets, inverted spans, overlapping entities, spans past text bounds
+- **Tokenizer warning**: untested checkpoint detection
+- **SentencePiece whitespace handling**: tokenizers like `google/flan-t5-base` absorb leading spaces into tokens (e.g., `▁Queen` → chars `(48, 54)` instead of `(49, 54)`). The decoder corrects these offsets, verified by round-trip tests across all SentencePiece checkpoints.

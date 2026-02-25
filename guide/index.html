@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://cldixon.github.io/iob2tensor/guide/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>User Guide - iob2labels</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "User Guide";
+        var mkdocs_page_input_path = "guide.md";
+        var mkdocs_page_url = "/iob2tensor/guide/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> iob2labels
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">User Guide</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#setting-up-the-encoder">Setting Up the Encoder</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#the-labels-parameter">The labels Parameter</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#the-tokenizer-parameter">The tokenizer Parameter</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#optional-parameters">Optional Parameters</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#encoding-annotations">Encoding Annotations</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#single-annotation">Single Annotation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#batch-encoding">Batch Encoding</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#decoding-predictions">Decoding Predictions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#from-raw-text">From Raw Text</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#from-a-pre-built-encoding">From a Pre-built Encoding</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#working-with-custom-data-formats">Working with Custom Data Formats</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#annotation-validation">Annotation Validation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#conversion-checking">Conversion Checking</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#converting-to-tensors">Converting to Tensors</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../tokenizers/">Supported Tokenizers</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">iob2labels</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">User Guide</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/cldixon/iob2tensor/edit/master/docs/guide.md">Edit on cldixon/iob2tensor</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="user-guide">User Guide</h1>
+<h2 id="overview">Overview</h2>
+<p><code>iob2labels</code> converts character-offset NER span annotations (the format used by tools like <a href="https://prodi.gy/docs">Prodigy</a>, <a href="https://labelstud.io/">Label Studio</a>, and <a href="https://github.com/doccano/doccano">Doccano</a>) into integer label sequences aligned to any HuggingFace-compatible tokenizer. At inference time, it converts model predictions back into span annotations.</p>
+<p>The library depends only on <code>tokenizers</code> (HuggingFace Rust backend) and <code>pydantic</code>. No <code>torch</code> or <code>transformers</code> required.</p>
+<h2 id="installation">Installation</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uv<span class="w"> </span>add<span class="w"> </span>iob2labels
+</code></pre></div>
+<p>Or with pip:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>iob2labels
+</code></pre></div>
+<h2 id="setting-up-the-encoder">Setting Up the Encoder</h2>
+<p>The <code>IOB2Encoder</code> is the main interface. It requires two arguments: the entity class names and a tokenizer.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">iob2labels</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOB2Encoder</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">IOB2Encoder</span><span class="p">(</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;actor&quot;</span><span class="p">,</span> <span class="s2">&quot;character&quot;</span><span class="p">,</span> <span class="s2">&quot;plot&quot;</span><span class="p">],</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">tokenizer</span><span class="o">=</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">)</span>
+</code></pre></div>
+<h3 id="the-labels-parameter">The <code>labels</code> Parameter</h3>
+<p>Pass a list of entity class names as strings. These are the NER categories in your annotation data. The encoder generates IOB2 tags from these labels:</p>
+<ul>
+<li>Each entity class produces 2 labels: <code>B-{LABEL}</code> (beginning) and <code>I-{LABEL}</code> (inside)</li>
+<li>Plus the <code>O</code> (outside) class</li>
+<li>Total label count is always <code>(n * 2) + 1</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">encoder</span><span class="o">.</span><span class="n">label_map</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># {&#39;O&#39;: 0, &#39;B-ACTOR&#39;: 1, &#39;I-ACTOR&#39;: 2, &#39;B-CHARACTER&#39;: 3, &#39;I-CHARACTER&#39;: 4, &#39;B-PLOT&#39;: 5, &#39;I-PLOT&#39;: 6}</span>
+</code></pre></div>
+<h3 id="the-tokenizer-parameter">The <code>tokenizer</code> Parameter</h3>
+<p>The <code>tokenizer</code> argument accepts three forms:</p>
+<p><strong>Checkpoint string</strong> — downloads the tokenizer from HuggingFace Hub. A <code>UserWarning</code> is emitted for checkpoints not in the <a href="../tokenizers/">tested list</a>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">IOB2Encoder</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><strong><code>tokenizers.Tokenizer</code> instance</strong> — used directly.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">tokenizers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tokenizer</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">tok</span> <span class="o">=</span> <span class="n">Tokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">IOB2Encoder</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tok</span><span class="p">)</span>
+</code></pre></div>
+<p><strong><code>transformers.PreTrainedTokenizerFast</code></strong> — the underlying <code>tokenizers.Tokenizer</code> is unwrapped automatically via the <code>.backend_tokenizer</code> attribute.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoTokenizer</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">tok</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">IOB2Encoder</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tok</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="optional-parameters">Optional Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ignore_token</code></td>
+<td><code>int</code></td>
+<td><code>-100</code></td>
+<td>Label value for special tokens (<code>[CLS]</code>, <code>[SEP]</code>, etc.). PyTorch's <code>CrossEntropyLoss</code> ignores this value by default.</td>
+</tr>
+<tr>
+<td><code>conversion_check</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Verify encoding correctness via round-trip check after every encoding. Disable for production performance.</td>
+</tr>
+<tr>
+<td><code>max_length</code></td>
+<td><code>int \| None</code></td>
+<td><code>512</code></td>
+<td>Maximum token sequence length. Entities beyond the truncation boundary are skipped. Set to <code>None</code> to disable truncation.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="encoding-annotations">Encoding Annotations</h2>
+<h3 id="single-annotation">Single Annotation</h3>
+<p>Call the encoder directly with <code>text</code> and <code>spans</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">labels</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Did Dame Judy Dench star in a British film about Queen Elizabeth?&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">spans</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>        <span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;actor&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="mi">19</span><span class="p">},</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;plot&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="mi">37</span><span class="p">},</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;character&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">49</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">},</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="p">]</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">)</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1"># [-100, 0, 1, 2, 2, 2, 0, 0, 0, 5, 0, 0, 3, 4, 0, -100]</span>
+</code></pre></div>
+<p>Each integer in the output corresponds to a token from the tokenizer:</p>
+<ul>
+<li><code>-100</code> — special tokens (<code>[CLS]</code>, <code>[SEP]</code>), ignored during loss computation</li>
+<li><code>0</code> — <code>O</code> (outside any entity)</li>
+<li><code>1</code> — <code>B-ACTOR</code> (beginning of an actor entity)</li>
+<li><code>2</code> — <code>I-ACTOR</code> (inside/continuation of an actor entity)</li>
+<li>And so on for each entity class</li>
+</ul>
+<h3 id="batch-encoding">Batch Encoding</h3>
+<p>For multiple annotations, use <code>batch()</code> which leverages the Rust-backed <code>encode_batch()</code> for parallelized tokenization:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">annotations</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Did Dame Judy Dench star?&quot;</span><span class="p">,</span> <span class="s2">&quot;spans&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;actor&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="mi">19</span><span class="p">}]},</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Matt Damon was Jason Bourne.&quot;</span><span class="p">,</span> <span class="s2">&quot;spans&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;actor&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}]},</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">]</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="n">results</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># [[-100, 0, 1, 2, 2, 2, 0, -100], [-100, 1, 2, 0, 0, 0, 0, -100]]</span>
+</code></pre></div>
+<p>Results are returned without padding. Use HuggingFace's <code>DataCollatorForTokenClassification</code> or your own padding logic for training.</p>
+<p>The <code>on_error</code> parameter controls error handling:</p>
+<ul>
+<li><code>"raise"</code> (default) — raise on the first error</li>
+<li><code>"skip"</code> — skip failed annotations, return results for successful ones</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">results</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">annotations</span><span class="p">,</span> <span class="n">on_error</span><span class="o">=</span><span class="s2">&quot;skip&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="decoding-predictions">Decoding Predictions</h2>
+<p>At inference time, convert model predictions (after <code>argmax</code>) back into character-offset span annotations.</p>
+<h3 id="from-raw-text">From Raw Text</h3>
+<p>Use <code>decode_text()</code> when you have the raw text but not the <code>Encoding</code> object:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">spans</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">decode_text</span><span class="p">(</span><span class="n">predicted_labels</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># [{&quot;start&quot;: 4, &quot;end&quot;: 19, &quot;label&quot;: &quot;actor&quot;}, ...]</span>
+</code></pre></div>
+<p>This tokenizes the text internally, then decodes.</p>
+<h3 id="from-a-pre-built-encoding">From a Pre-built Encoding</h3>
+<p>Use <code>decode()</code> when you already have the <code>tokenizers.Encoding</code> object (avoids re-tokenizing):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">spans</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">predicted_labels</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</code></pre></div>
+<p>Both methods return <code>list[Span]</code> — a list of typed dicts with <code>start</code>, <code>end</code>, and <code>label</code> fields.</p>
+<div class="admonition note">
+<p class="admonition-title">SentencePiece whitespace handling</p>
+<p>Tokenizers like ALBERT, XLNet, T5, and XLM-RoBERTa absorb leading whitespace into tokens (e.g., <code>▁Queen</code> maps to chars <code>(48, 54)</code> instead of <code>(49, 54)</code>). The decoder corrects these offsets automatically using the original text, so the returned spans always have accurate character boundaries.</p>
+</div>
+<h2 id="working-with-custom-data-formats">Working with Custom Data Formats</h2>
+<p>Annotation tools use different field names. Configure the encoder to match your data format:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># BioMed-NER dataset uses &quot;entities&quot; and &quot;class&quot; instead of &quot;spans&quot; and &quot;label&quot;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">IOB2Encoder</span><span class="p">(</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;organism&quot;</span><span class="p">,</span> <span class="s2">&quot;chemicals&quot;</span><span class="p">],</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">tokenizer</span><span class="o">=</span><span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">spans_field</span><span class="o">=</span><span class="s2">&quot;entities&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="n">label_field</span><span class="o">=</span><span class="s2">&quot;class&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="p">)</span>
+</code></pre></div>
+<p>Available field name overrides:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text_field</code></td>
+<td><code>"text"</code></td>
+<td>Key for the text string in batch annotation dicts</td>
+</tr>
+<tr>
+<td><code>spans_field</code></td>
+<td><code>"spans"</code></td>
+<td>Key for the spans list in batch annotation dicts</td>
+</tr>
+<tr>
+<td><code>start_field</code></td>
+<td><code>"start"</code></td>
+<td>Key for the start offset in span dicts</td>
+</tr>
+<tr>
+<td><code>end_field</code></td>
+<td><code>"end"</code></td>
+<td>Key for the end offset in span dicts</td>
+</tr>
+<tr>
+<td><code>label_field</code></td>
+<td><code>"label"</code></td>
+<td>Key for the entity label in span dicts</td>
+</tr>
+</tbody>
+</table>
+<h2 id="annotation-validation">Annotation Validation</h2>
+<p>Input annotations are validated upfront with clear error messages:</p>
+<ul>
+<li><strong>Negative offsets</strong> — <code>start</code> or <code>end</code> less than 0</li>
+<li><strong>Inverted spans</strong> — <code>start &gt;= end</code></li>
+<li><strong>Out-of-bounds spans</strong> — <code>end</code> exceeds text length</li>
+<li><strong>Overlapping spans</strong> — IOB2 does not support overlapping entities</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">encoder</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span> <span class="n">spans</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}])</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="c1"># ValueError: Span 0 (&#39;test&#39;) extends past the text (end=100, text length=5).</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># Ensure character offsets are within the text bounds.</span>
+</code></pre></div>
+<h2 id="conversion-checking">Conversion Checking</h2>
+<p>By default, every encoding is verified by recovering the entity text from the produced labels and comparing it to the original annotation. This catches tokenizer misalignment bugs early.</p>
+<p>Disable it for production performance once you've verified correctness:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">encoder</span> <span class="o">=</span> <span class="n">IOB2Encoder</span><span class="p">(</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="n">tokenizer</span><span class="o">=</span><span class="n">tok</span><span class="p">,</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">conversion_check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="p">)</span>
+</code></pre></div>
+<h2 id="converting-to-tensors">Converting to Tensors</h2>
+<p>The encoder returns <code>list[int]</code>, which can be converted to any tensor format:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># or with numpy</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+</code></pre></div>
+<p>For batched training, the sequences are unpadded. Use HuggingFace's <code>DataCollatorForTokenClassification</code> to handle padding and label alignment:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCollatorForTokenClassification</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">collator</span> <span class="o">=</span> <span class="n">DataCollatorForTokenClassification</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">hf_tokenizer</span><span class="p">)</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../api/" class="btn btn-neutral float-right" title="API Reference">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/cldixon/iob2tensor" class="fa fa-code-fork" style="color: #fcfcfc"> cldixon/iob2tensor</a>
+        </span>
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../api/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

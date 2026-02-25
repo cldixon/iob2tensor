@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://cldixon.github.io/iob2tensor/tokenizers/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Supported Tokenizers - iob2labels</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Supported Tokenizers";
+        var mkdocs_page_input_path = "tokenizers.md";
+        var mkdocs_page_url = "/iob2tensor/tokenizers/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> iob2labels
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../guide/">User Guide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../api/">API Reference</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Supported Tokenizers</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#tested-checkpoints">Tested Checkpoints</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tokenizer-families">Tokenizer Families</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#wordpiece">WordPiece</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#bpe-byte-level">BPE (Byte-Level)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sentencepiece-bpe">SentencePiece BPE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sentencepiece-unigram">SentencePiece Unigram</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sentencepiece-whitespace-handling">SentencePiece Whitespace Handling</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-untested-tokenizers">Using Untested Tokenizers</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">iob2labels</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Supported Tokenizers</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/cldixon/iob2tensor/edit/master/docs/tokenizers.md">Edit on cldixon/iob2tensor</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="supported-tokenizers">Supported Tokenizers</h1>
+<p><code>iob2labels</code> is tested across four tokenizer families covering 18 checkpoints. Both encoding and decoding are verified via round-trip tests: encode spans to labels, decode labels back to spans, and assert the recovered spans exactly match the originals.</p>
+<h2 id="tested-checkpoints">Tested Checkpoints</h2>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Checkpoints</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WordPiece</td>
+<td><code>bert-base-cased</code>, <code>bert-base-uncased</code>, <code>bert-large-cased</code>, <code>bert-large-uncased</code>, <code>bert-base-multilingual-cased</code>, <code>distilbert-base-cased</code>, <code>distilbert-base-uncased</code>, <code>google/electra-base-discriminator</code></td>
+</tr>
+<tr>
+<td>BPE (byte-level)</td>
+<td><code>roberta-base</code>, <code>roberta-large</code>, <code>distilroberta-base</code>, <code>allenai/longformer-base-4096</code></td>
+</tr>
+<tr>
+<td>SentencePiece BPE</td>
+<td><code>FacebookAI/xlm-roberta-base</code>, <code>almanach/camembert-base</code></td>
+</tr>
+<tr>
+<td>SentencePiece Unigram</td>
+<td><code>albert-base-v2</code>, <code>xlnet-base-cased</code>, <code>t5-small</code>, <code>google/flan-t5-base</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="tokenizer-families">Tokenizer Families</h2>
+<h3 id="wordpiece">WordPiece</h3>
+<p>WordPiece tokenizers (BERT, DistilBERT, ELECTRA) split words into subword units prefixed with <code>##</code>. For example, "tokenization" might become <code>["token", "##ization"]</code>. Character-to-token alignment is straightforward — each subword maps cleanly to a contiguous character range.</p>
+<p>These tokenizers are fully compatible with <code>iob2labels</code> and require no special handling.</p>
+<h3 id="bpe-byte-level">BPE (Byte-Level)</h3>
+<p>Byte-level BPE tokenizers (RoBERTa, Longformer) operate on byte-level representations and use <code>\u0120</code> (Ġ) as a word-boundary prefix. For example, " Queen" becomes <code>["ĠQueen"]</code>.</p>
+<p>The <code>Encoding.char_to_token()</code> and <code>Encoding.token_to_chars()</code> methods handle the byte-level mapping correctly, so <code>iob2labels</code> works with these tokenizers without modification.</p>
+<h3 id="sentencepiece-bpe">SentencePiece BPE</h3>
+<p>SentencePiece BPE tokenizers (XLM-RoBERTa, CamemBERT) use the <code>▁</code> (U+2581) character to represent word boundaries. For example, " Queen" becomes <code>["▁Queen"]</code>.</p>
+<p>These tokenizers absorb the leading whitespace into the token, which means <code>token_to_chars()</code> returns a range that includes the space character. The decoder handles this automatically — see <a href="#sentencepiece-whitespace-handling">Whitespace Handling</a> below.</p>
+<h3 id="sentencepiece-unigram">SentencePiece Unigram</h3>
+<p>SentencePiece Unigram tokenizers (ALBERT, XLNet, T5, Flan-T5) also use the <code>▁</code> prefix convention and share the same whitespace absorption behavior as SentencePiece BPE.</p>
+<div class="admonition note">
+<p class="admonition-title">Google Flan-T5 sentinel tokens</p>
+<p>Flan-T5 uses sentinel tokens (e.g., <code>&lt;extra_id_0&gt;</code>) in its vocabulary. The round-trip check accounts for these during conversion verification.</p>
+</div>
+<h2 id="sentencepiece-whitespace-handling">SentencePiece Whitespace Handling</h2>
+<p>SentencePiece-based tokenizers (both BPE and Unigram families) absorb leading whitespace into the first token of each word. This means <code>token_to_chars()</code> can return character offsets that include the space <em>before</em> the entity rather than just the entity text.</p>
+<p>For example, given the text <code>"film about Queen Elizabeth"</code> and an entity at <code>(11, 26)</code> covering <code>"Queen Elizabeth"</code>:</p>
+<ul>
+<li>A WordPiece tokenizer maps <code>"Queen"</code> to chars <code>(11, 16)</code> — correct</li>
+<li>A SentencePiece tokenizer maps <code>"▁Queen"</code> to chars <code>(10, 16)</code> — includes the preceding space</li>
+</ul>
+<p>The decoder corrects this automatically by stripping leading (and trailing) whitespace from the recovered character range using the original text. No configuration needed.</p>
+<h2 id="using-untested-tokenizers">Using Untested Tokenizers</h2>
+<p>Any HuggingFace-compatible tokenizer with a <code>tokenizer.json</code> file on the Hub should work with <code>iob2labels</code>. When you use a checkpoint not in the tested list, a <code>UserWarning</code> is emitted:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>UserWarning: Tokenizer &#39;my-custom/tokenizer&#39; is not in the list of checkpoints tested
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>with iob2labels. It may work correctly, but results have not been verified.
+</code></pre></div>
+<p>The built-in conversion check (<code>conversion_check=True</code>, the default) will catch any alignment issues at encoding time. If the round-trip verification passes, the tokenizer is working correctly for your data.</p>
+<p>To suppress the warning once you've verified correctness:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Tokenizer.*not in the list&quot;</span><span class="p">)</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../api/" class="btn btn-neutral float-left" title="API Reference"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/cldixon/iob2tensor" class="fa fa-code-fork" style="color: #fcfcfc"> cldixon/iob2tensor</a>
+        </span>
+    
+    
+      <span><a href="../api/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

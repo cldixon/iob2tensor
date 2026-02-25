@@ -18,14 +18,14 @@ class TestUntestedTokenizerWarning:
     def test_unsupported_tokenizer_warns(self):
         """An untested checkpoint should emit a UserWarning."""
         with pytest.warns(UserWarning, match="not in the list of checkpoints tested"):
-            resolve_tokenizer("bert-base-multilingual-cased")
+            resolve_tokenizer("google/mobilebert-uncased")
 
     def test_warning_includes_checkpoint_name(self):
         """The warning message should include the checkpoint name used."""
-        with pytest.warns(UserWarning, match="bert-base-multilingual-cased"):
-            resolve_tokenizer("bert-base-multilingual-cased")
+        with pytest.warns(UserWarning, match="google/mobilebert-uncased"):
+            resolve_tokenizer("google/mobilebert-uncased")
 
     def test_unsupported_via_encoder(self):
         """Warning surfaces when constructing IOB2Encoder with an untested checkpoint."""
         with pytest.warns(UserWarning, match="not in the list of checkpoints tested"):
-            IOB2Encoder(labels=["person"], tokenizer="bert-base-multilingual-cased")
+            IOB2Encoder(labels=["person"], tokenizer="google/mobilebert-uncased")

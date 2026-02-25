@@ -10,16 +10,23 @@ SUPPORTED_TOKENIZERS = [
     "bert-base-uncased",
     "bert-large-cased",
     "bert-large-uncased",
+    "bert-base-multilingual-cased",
     "distilbert-base-cased",
     "distilbert-base-uncased",
     "google/electra-base-discriminator",
-    # BPE family
+    # BPE family (byte-level)
     "roberta-base",
     "roberta-large",
+    "distilroberta-base",
+    "allenai/longformer-base-4096",
+    # SentencePiece BPE family
+    "FacebookAI/xlm-roberta-base",
+    "almanach/camembert-base",
     # SentencePiece / Unigram family
     "albert-base-v2",
     "xlnet-base-cased",
     "t5-small",
+    "google/flan-t5-base",
 ]
 
 DEFAULT_MAX_LENGTH = 512
